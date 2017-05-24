@@ -114,9 +114,9 @@ def main():
 #            model.saveas_darknet_weights('resnet50.weights')
         if args.arch == 'resnet50':
             from darknet import Darknet
-            model = Darknet('msr_50.cfg')
-            print('load weights from msr_50.weights')
-            model.load_weights('msr_50.weights')
+            model = Darknet('cfg/resnet50.cfg')
+            print('load weights from resnet50.weights')
+            model.load_weights('resnet50.weights')
         else:
             model = models.__dict__[args.arch](pretrained=True)
     else:
