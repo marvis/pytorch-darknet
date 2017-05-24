@@ -1,5 +1,4 @@
 import torch
-from utils import convert2cpu
 
 def parse_cfg(cfgfile):
     blocks = []
@@ -125,6 +124,23 @@ def print_cfg(blocks):
             out_widths.append(prev_width)
             out_heights.append(prev_height)
             out_filters.append(prev_filters)
+        elif block['type'] == 'shortcut':
+            from_id = int(block['from'])
+            from_id = from_id if from_id > 0 else from_id+ind
+            print('%5d %-6s %d' % (ind, 'shortcut', from_id))
+            prev_width = out_widths[from_id]
+            prev_height = out_heights[from_id]
+            prev_filters = out_filters[from_id]
+            out_widths.append(prev_width)
+            out_heights.append(prev_height)
+            out_filters.append(prev_filters)
+        elif block['type'] == 'connected':
+            filters = int(block['output'])
+            print('%5d %-6s                            %d  ->  %3d' % (ind, 'connected', prev_filters,  filters))
+            prev_filters = filters
+            out_widths.append(1)
+            out_heights.append(1)
+            out_filters.append(prev_filters)
         else:
             print('unknown type %s' % (block['type']))
 
@@ -180,7 +196,6 @@ def save_fc(fp, fc_model):
 
 if __name__ == '__main__':
     import sys
-    blocks = parse_cfg('cfg/yolo.cfg')
     if len(sys.argv) == 2:
         blocks = parse_cfg(sys.argv[1])
     print_cfg(blocks)

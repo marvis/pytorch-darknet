@@ -107,7 +107,18 @@ def main():
     # create model
     if args.pretrained:
         print("=> using pre-trained model '{}'".format(args.arch))
-        model = models.__dict__[args.arch](pretrained=True)
+#        if args.arch == 'resnet50':
+#            import resnet_model
+#            model = resnet_model.resnet50_new(pretrained=True) 
+#            print('save resnet50 to resnet50.weights')
+#            model.saveas_darknet_weights('resnet50.weights')
+        if args.arch == 'resnet50':
+            from darknet import Darknet
+            model = Darknet('msr_50.cfg')
+            print('load weights from msr_50.weights')
+            model.load_weights('msr_50.weights')
+        else:
+            model = models.__dict__[args.arch](pretrained=True)
     else:
         print("=> creating model '{}'".format(args.arch))
         if args.arch.startswith('mobilenet'):

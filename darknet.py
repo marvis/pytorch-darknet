@@ -79,7 +79,7 @@ class Darknet(nn.Module):
 
             if block['type'] == 'net':
                 continue
-            elif block['type'] == 'convolutional' or block['type'] == 'maxpool' or block['type'] == 'reorg' or block['type'] == 'avgpool' or block['type'] == 'softmax':
+            elif block['type'] == 'convolutional' or block['type'] == 'maxpool' or block['type'] == 'reorg' or block['type'] == 'avgpool' or block['type'] == 'softmax' or block['type'] == 'connected':
                 x = self.models[ind](x)
                 outputs[ind] = x
             elif block['type'] == 'route':
@@ -193,6 +193,21 @@ class Darknet(nn.Module):
                 prev_filters = out_filters[ind-1]
                 out_filters.append(prev_filters)
                 models.append(EmptyModule())
+            elif block['type'] == 'connected':
+                filters = int(block['output'])
+                if block['activation'] == 'linear':
+                    model = nn.Linear(prev_filters, filters)
+                elif block['activation'] == 'leaky':
+                    model = nn.Sequential(
+                               nn.Linear(prev_filters, filters),
+                               nn.LeakyReLU(0.1, inplace=True))
+                elif block['activation'] == 'relu':
+                    model = nn.Sequential(
+                               nn.Linear(prev_filters, filters),
+                               nn.ReLU(inplace=True))
+                prev_filters = filters
+                out_filters.append(prev_filters)
+                models.append(model)
             else:
                 print('unknown type %s' % (block['type']))
     
@@ -221,6 +236,9 @@ class Darknet(nn.Module):
                     start = load_conv_bn(buf, start, model[0], model[1])
                 else:
                     start = load_conv(buf, start, model[0])
+            elif block['type'] == 'connected':
+                model = self.models[ind]
+                start = load_fc(buf, start, model[0])
             elif block['type'] == 'maxpool':
                 pass
             elif block['type'] == 'reorg':
@@ -258,6 +276,9 @@ class Darknet(nn.Module):
                     save_conv_bn(fp, model[0], model[1])
                 else:
                     save_conv(fp, model[0])
+            elif block['type'] == 'connected':
+                model = self.models[ind]
+                save_fc(fc, model[0])
             elif block['type'] == 'maxpool':
                 pass
             elif block['type'] == 'reorg':
