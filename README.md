@@ -7,4 +7,4 @@ This repository supports training classification task on pytorch by loading dark
 
 # Todo
 - [x] convert torchvision resnet50 to darknet
-- [ ] evaluate resnet50 model on imagenet
+- [x] evaluate resnet50 model on imagenet
