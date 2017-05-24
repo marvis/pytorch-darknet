@@ -125,11 +125,6 @@ def print_cfg(blocks):
             out_widths.append(prev_width)
             out_heights.append(prev_height)
             out_filters.append(prev_filters)
-        elif block['type'] == 'region':
-            print('%5d %-6s' % (ind, 'detection'))
-            out_widths.append(prev_width)
-            out_heights.append(prev_height)
-            out_filters.append(prev_filters)
         else:
             print('unknown type %s' % (block['type']))
 
