@@ -67,8 +67,15 @@ class Darknet(nn.Module):
 
         self.header = torch.IntTensor([0,0,0,0])
         self.seen = 0
+        self.has_mean = False
+
+    def load_mean_file(self, mean_file):
+        return torch.from_numpy(np.fromfile(mean_file, dtype=np.float32))
 
     def forward(self, x):
+        if self.has_mean:
+            x = x - self.mean_img
+
         ind = -2
         self.loss = None
         outputs = dict()
@@ -214,6 +221,11 @@ class Darknet(nn.Module):
         return models
 
     def load_weights(self, weightfile):
+        if blocks[0].has_key('mean_file'):
+            mean_file = blocks[0]['mean_file']
+            self.has_mean = True
+            self.mean_img = Variable(self.load_mean_file(mean_file), requires_grad=False)
+
         fp = open(weightfile, 'rb')
         header = np.fromfile(fp, count=4, dtype=np.int32)
         self.header = torch.from_numpy(header)

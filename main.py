@@ -117,6 +117,11 @@ def main():
             model = Darknet('cfg/resnet50.cfg')
             print('load weights from resnet50.weights')
             model.load_weights('resnet50.weights')
+        elif args.arch = 'resnet50-test':
+            from darknet import Darknet
+            model = Darknet('test/ResNet-50-model.cfg')
+            print('load weights from test/ResNet-50-model.weights')
+            model.load_weights('test/ResNet-50-model.weights')
         else:
             model = models.__dict__[args.arch](pretrained=True)
     else:
