@@ -1,6 +1,7 @@
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
+from torch.autograd import Variable
 import numpy as np
 from cfg import *
 
@@ -70,11 +71,12 @@ class Darknet(nn.Module):
         self.has_mean = False
 
     def load_mean_file(self, mean_file):
-        return torch.from_numpy(np.fromfile(mean_file, dtype=np.float32))
+        return torch.from_numpy(np.load(mean_file)).float()
 
     def forward(self, x):
         if self.has_mean:
-            x = x - self.mean_img
+            batch_size = x.data.size(0)
+            x = x - self.mean_img.repeate(batch_size, 1, 1, 1)/255.0
 
         ind = -2
         self.loss = None
@@ -221,8 +223,8 @@ class Darknet(nn.Module):
         return models
 
     def load_weights(self, weightfile):
-        if blocks[0].has_key('mean_file'):
-            mean_file = blocks[0]['mean_file']
+        if self.blocks[0].has_key('mean_file'):
+            mean_file = self.blocks[0]['mean_file']
             self.has_mean = True
             self.mean_img = Variable(self.load_mean_file(mean_file), requires_grad=False)
 
@@ -250,7 +252,10 @@ class Darknet(nn.Module):
                     start = load_conv(buf, start, model[0])
             elif block['type'] == 'connected':
                 model = self.models[ind]
-                start = load_fc(buf, start, model[0])
+                if block['activation'] != 'linear':
+                    start = load_fc(buf, start, model[0])
+                else:
+                    start = load_fc(buf, start, model)
             elif block['type'] == 'maxpool':
                 pass
             elif block['type'] == 'reorg':

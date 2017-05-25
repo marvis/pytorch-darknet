@@ -24,7 +24,7 @@ parser = argparse.ArgumentParser(description='PyTorch ImageNet Training')
 parser.add_argument('data', metavar='DIR',
                     help='path to dataset')
 parser.add_argument('--arch', '-a', metavar='ARCH', default='resnet18',
-                    choices=model_names,
+                    #choices=model_names,
                     help='model architecture: ' +
                         ' | '.join(model_names) +
                         ' (default: resnet18)')
@@ -117,7 +117,7 @@ def main():
             model = Darknet('cfg/resnet50.cfg')
             print('load weights from resnet50.weights')
             model.load_weights('resnet50.weights')
-        elif args.arch = 'resnet50-test':
+        elif args.arch == 'resnet50-test':
             from darknet import Darknet
             model = Darknet('test/ResNet-50-model.cfg')
             print('load weights from test/ResNet-50-model.weights')
@@ -164,8 +164,12 @@ def main():
     # Data loading code
     traindir = os.path.join(args.data, 'train')
     valdir = os.path.join(args.data, 'val')
-    normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
-                                     std=[0.229, 0.224, 0.225])
+    if args.arch == 'resnet50-test':
+        normalize = transforms.Normalize(mean=[0.0, 0.0, 0.0],
+                                         std=[1.0, 1.0, 1.0])
+    else:
+        normalize = transforms.Normalize(mean=[0.485, 0.456, 0.406],
+                                         std=[0.229, 0.224, 0.225])
 
     train_loader = torch.utils.data.DataLoader(
         datasets.ImageFolder(traindir, transforms.Compose([
